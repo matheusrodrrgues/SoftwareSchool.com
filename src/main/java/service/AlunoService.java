@@ -46,10 +46,10 @@ public class AlunoService {
     public int criar(String nome, LocalDate nasc, String nat, Endereco end, Integer respId, boolean respProf, Integer turmaId) {
         if(respId != null) {
             boolean respValido = (respProf && professorRepo.buscarId(respId).isPresent()) || (!respProf && responsavelRepo.buscarId(respId).isPresent());
-            if(!respValido) throw new IllegalArgumentException("Aluno precisa estar vinculado a um responsável válido!");
+            if(!respValido) throw new IllegalArgumentException("\nAluno precisa estar vinculado a um responsável válido!");
         }
         if(turmaId == null || turmaRepo.buscarId(turmaId).isEmpty())
-            throw new IllegalArgumentException("Aluno precisa estar vinculado a uma turma válida!");
+            throw new IllegalArgumentException("\nAluno precisa estar vinculado a uma turma válida!");
 
         Aluno a = new Aluno();
         a.setNome(nome);

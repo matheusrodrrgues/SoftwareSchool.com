@@ -48,7 +48,7 @@ public class ProfessorService {
      */
     public int criar(String nome, String formacao, String tel, LocalDate dn, Integer turmaId, Endereco end) {
         if(turmaId == null || turmaRepo.buscarId(turmaId).isEmpty())
-            throw new IllegalArgumentException("Professor precisa estar vinculado a uma turma válida");
+            throw new IllegalArgumentException("\nProfessor precisa estar vinculado a uma turma válida");
         Professor p = new Professor();
         p.setNome(nome);
         p.setFormacao(formacao);
@@ -174,7 +174,7 @@ public class ProfessorService {
                 var turmaExistente = turmaRepo.buscarId(tId);
                 if (turmaExistente.isPresent() &&
                         turmaExistente.get().getAnoLetivo().equals(novaTurma.getAnoLetivo())) {
-                    System.out.println("O professor já possui turma neste ano letivo!");
+                    System.out.println("\nO professor já possui turma neste ano letivo!");
                     return false;
                 }
             }

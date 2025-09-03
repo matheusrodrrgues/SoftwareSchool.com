@@ -69,8 +69,6 @@ public class Main {
      * @return true se for para voltar
      */
     private static boolean checkVoltar(String s) {return s.trim().equals("0");}
-
-    // [CRUD] inicial do sistema
     /**
      * Menu de cadastro de entidades.
      */
@@ -173,7 +171,7 @@ public class Main {
                     int turmaId = turmaCtrl.criar(serie, ano);
                     System.out.println("\nTurma criada com sucesso! Id=" + turmaId);
 
-                    System.out.print("Vincular um professor a esta turma? (s/n): ");
+                    System.out.print("\nVincular um professor a esta turma? (s/n): ");
                     String vincularProf = sc.nextLine().trim().toLowerCase();
 
                     if (vincularProf.equals("s")) {
@@ -193,7 +191,7 @@ public class Main {
                                 return;
                             }
                         } else {
-                            System.out.println("\n");
+
                             System.out.println("Cadastro de novo professor vinculado a: " + turmaId);
                             try {
                                 System.out.print("Nome completo: ");
@@ -280,8 +278,8 @@ public class Main {
     private static void menuAtualizar(Scanner sc, AlunoController alunoCtrl, ResponsavelController respCtrl,
                                       TurmaController turmaCtrl, ProfessorController profCtrl) {
         System.out.println("-> ATUALIZAR: 1) Aluno  2) Responsável  3) Turma  4) Professor");
-        System.out.println("\n Pressione enter para manter o valor atual.");
-        System.out.print("Opção: ");
+        System.out.println("Pressione enter para manter o valor atual.");
+        System.out.print("\nOpção: ");
 
         int op = safeInt(sc);
         switch (op) {
@@ -305,18 +303,24 @@ public class Main {
                 Endereco end = null;
                 if (opEnd.equals("s")) {end = askEndereco(sc);}
 
-                System.out.print("Deseja trocar a turma? (s/n): ");
+                System.out.print("\nDeseja trocar a turma? (s/n): ");
                 String opTurma = sc.nextLine().trim().toLowerCase();
                 Integer turmaId = null;
                 if (opTurma.equals("s")) {
                     System.out.println("\n-- LISTA DE TURMAS --");
                     turmaCtrl.listar().forEach(t -> System.out.println("ID: " + t.getId() + " | Série: " + t.getSerie() + " (" + t.getAnoLetivo() + ")"));
-                    System.out.print("Digite o ID da nova turma: ");
+                    System.out.print("Digite o ID da nova turma (ou 0 para manter): ");
                     int tId = safeInt(sc);
-                    turmaId = (tId == 0 ? null : tId);
+                    if (tId != 0) {
+                        if (turmaCtrl.buscar(tId).isEmpty()) {
+                            System.out.println("ID de turma inválido! Turma não será alterada.");
+                        } else {
+                            turmaId = tId;
+                        }
+                    }
                 }
 
-                System.out.print("Deseja trocar o responsável? (s/n): ");
+                System.out.print("neseja trocar o responsável? (s/n): ");
                 String opResp = sc.nextLine().trim().toLowerCase();
                 Integer respId = null;
                 boolean respEhProf = false;
@@ -325,12 +329,23 @@ public class Main {
                     System.out.println("\n-- LISTA DE RESPONSÁVEIS E PROFESSORES --");
                     respCtrl.listar().forEach(r -> System.out.println("ID: " + r.getId() + " | Nome: " + r.getNome()));
                     profCtrl.listar().forEach(p -> System.out.println("ID: " + p.getId() + " | Nome: " + p.getNome()));
-                    System.out.print("Digite o ID do novo responsável: ");
-                    respId = safeInt(sc);
-                    if(profCtrl.buscar(respId).isPresent()) respEhProf = true;
+                    System.out.print("Digite o ID do novo responsável (ou 0 para manter): ");
+                    int rId = safeInt(sc);
+                    if (rId != 0) {
+                        if (profCtrl.buscar(rId).isPresent()) {
+                            respId = rId;
+                            respEhProf = true;
+                        } else if (respCtrl.buscar(rId).isPresent()) {
+                            respId = rId;
+                            respEhProf = false;
+                        } else {
+                            System.out.println("ID de responsável inválido! Responsável não será alterado.");
+                        }
+                    }
                 }
                 boolean ok = alunoCtrl.atualizar(id, emptyToNull(nome), nasc, emptyToNull(nat), end, turmaId, respId, respEhProf);
-                System.out.println(ok ? "Aluno atualizado com sucesso!" : "Aluno não encontrado!");
+                System.out.println(ok ? "Aluno atualizado com sucesso!" :
+                        "Aluno não encontrado ou dados inválidos!");
 
                 if (respId != null) {
                     respCtrl.buscar(respId).ifPresent(r -> {
@@ -374,7 +389,6 @@ public class Main {
                 } else {
                     end = null;
                 }
-
                 System.out.print("Nova data de nascimento (dd/mm/aaaa): ");
                 String dnStr = sc.nextLine().trim();
                 LocalDate dn = dnStr.isBlank() ? null : LocalDate.parse(dnStr, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
@@ -406,8 +420,7 @@ public class Main {
             }
             case 3 -> {
                 System.out.println("\n===== LISTA DE TURMAS =====");
-                turmaCtrl.listar().forEach(t ->
-                        System.out.println("ID: " + t.getId() + " | Série: " + t.getSerie() + " (" + t.getAnoLetivo() + ")"));
+                turmaCtrl.listar().forEach(t -> System.out.println("ID: " + t.getId() + " | Série: " + t.getSerie() + " (" + t.getAnoLetivo() + ")"));
                 System.out.print("Digite o ID da turma que deseja atualizar: ");
                 int id = safeInt(sc);
                 System.out.println("\n");
@@ -443,7 +456,7 @@ public class Main {
                                 }
                             }
                         } else {
-                            System.out.println("Nenhum professor vinculado a esta turma.");
+                            System.out.println("\nNenhum professor vinculado a esta turma.");
                             System.out.print("Deseja vincular um professor agora? (s/n): ");
                             String vinc = sc.nextLine().trim().toLowerCase();
                             if (vinc.equals("s")) {
@@ -500,12 +513,12 @@ public class Main {
 
                 boolean ok = profCtrl.atualizar(id, emptyToNull(nome), emptyToNull(formacao), emptyToNull(telefone), end, nasc, turmaId);
                 System.out.println(ok ? "Professor atualizado com sucesso!" : "Professor não encontrado!");
-                System.out.print("Deseja gerenciar dependentes do professor? (s/n): ");
+                System.out.print("\nDeseja gerenciar dependentes do professor? (s/n): ");
 
                 String opDep = sc.nextLine().trim().toLowerCase();
                 if(opDep.equals("s")){
 
-                    System.out.println("===== LISTA DE ALUNOS =====");
+                    System.out.println("\n===== LISTA DE ALUNOS =====");
                     alunoCtrl.listar().forEach(a -> System.out.println("ID: " + a.getId() + " | Nome: " + a.getNome()));
                     System.out.print("Digite o ID do aluno para vincular (ou 0 para remover um dependente existente): ");
                     int alunoId = safeInt(sc);
